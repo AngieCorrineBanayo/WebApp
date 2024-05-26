@@ -1,5 +1,6 @@
 ﻿@page
-@model Index
+@model WebApp.Pages.Index
+
 @{
     ViewData["Title"] = "Home page";
 }
@@ -15,22 +16,22 @@
             <th scope="col">
                 Name
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=name&sortAsc=false" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-down"></i></a>
-                    <a href="~/index?sortBy=name&sortAsc=true" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-up"></i></a>
+                    <a href="~/index?sortBy=name&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=name&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
             <th scope="col">
                 Price
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=price&sortAsc=false" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-down"></i></a>
-                    <a href="~/index?sortBy=price&sortAsc=true" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-up"></i></a>
+                    <a href="~/index?sortBy=price&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=price&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
             <th scope="col">
                 Category
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=category&sortAsc=false" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-down"></i></a>
-                    <a href="~/index?sortBy=category&sortAsc=true" type="button" class="btn btn-secondary"><i class="bi bi-arrow-bar-up"></i></a>
+                    <a href="~/index?sortBy=category&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=category&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
         </tr>

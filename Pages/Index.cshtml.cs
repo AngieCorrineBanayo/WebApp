@@ -112,27 +112,46 @@ namespace WebApp.Pages
 
             if (sortBy == null || sortAsc == null)
             {
-                Products = products;
+                this.Products = products;
                 return;
             }
 
-            bool ascending = sortAsc.ToLower() == "true";
-
-            Products = sortBy.ToLower() switch
+            if (sortBy!.ToLower() == "name" && sortAsc!.ToLower() == "true")
             {
-                "name" => ascending ? products.OrderBy(p => p.Name).ToList() : products.OrderByDescending(p => p.Name).ToList(),
-                "price" => ascending ? products.OrderBy(p => p.Price).ToList() : products.OrderByDescending(p => p.Price).ToList(),
-                "category" => ascending ? products.OrderBy(p => p.Category).ToList() : products.OrderByDescending(p => p.Category).ToList(),
-                _ => products
-            };
+                this.Products = products.OrderBy(a => a.Name).ToList();
+            }
+            else if (sortBy!.ToLower() == "name" && sortAsc!.ToLower() == "false")
+            {
+                this.Products = products.OrderByDescending(a => a.Name).ToList();
+            }
+            else if (sortBy!.ToLower() == "price" && sortAsc!.ToLower() == "true")
+            {
+                this.Products = products.OrderBy(a => a.Price).ToList();
+            }
+            else if (sortBy!.ToLower() == "price" && sortAsc!.ToLower() == "false")
+            {
+                this.Products = products.OrderByDescending(a => a.Price).ToList();
+            }
+            else if (sortBy!.ToLower() == "category" && sortAsc!.ToLower() == "true")
+            {
+                this.Products = products.OrderBy(a => a.Category).ToList();
+            }
+            else if (sortBy!.ToLower() == "category" && sortAsc!.ToLower() == "false")
+            {
+                this.Products = products.OrderByDescending(a => a.Category).ToList();
+            }
+            else
+            {
+                this.Products = products;
+            }
         }
 
         public class Product
         {
             public int Id { get; set; }
-            public string? Name { get; set; }
+            public string Name { get; set; }
             public decimal Price { get; set; }
-            public string? Category { get; set; }
+            public string Category { get; set; }
         }
     }
 }
