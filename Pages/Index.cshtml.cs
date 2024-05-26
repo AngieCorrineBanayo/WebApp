@@ -1,23 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WebApp.Pages
 {
-    public class Indexname : PageModel
+    public class Index : PageModel
     {
-        private readonly ILogger<Indexname> _logger;
-
-        public Indexname(ILogger<Indexname> logger)
-        {
-            _logger = logger;
-        }
-
         public List<Product> Products { get; set; }
 
         [BindProperty]
         public SearchParameters SearchParams { get; set; }
 
-        public void OnGet(string keyword = "", string searchBy = "", string sortBy = null, string sortAsc = "true")
+        public void OnGet(string keyword = "", string searchBy = "", string sortBy = null, string sortAsc = "true", int pageSize = 5, int pageIndex = 1)
         {
             if (SearchParams == null)
             {
@@ -26,7 +23,9 @@ namespace WebApp.Pages
                     SortBy = sortBy,
                     SortAsc = sortAsc == "true",
                     SearchBy = searchBy,
-                    Keyword = keyword
+                    Keyword = keyword,
+                    PageIndex = pageIndex,
+                    PageSize = pageSize
                 };
             }
 
@@ -123,60 +122,87 @@ namespace WebApp.Pages
                     Category = "Electronics"
                 }
             };
+
             if (!string.IsNullOrEmpty(SearchParams.SearchBy) && !string.IsNullOrEmpty(SearchParams.Keyword))
+            
             {
-                switch (SearchParams.SearchBy.ToLower())
+                if (SearchParams.SearchBy.ToLower() == "id")
                 {
-                    case "id":
-                        if (int.TryParse(SearchParams.Keyword, out int id))
-                        {
-                            products = products.Where(p => p.Id == id).ToList();
-                        }
-                        break;
-                    case "name":
-                        products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
-                        break;
-                    case "category":
-                        products = products.Where(p => p.Category != null && p.Category.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
-                        break;
-                    case "price":
-                        if (decimal.TryParse(SearchParams.Keyword, out decimal price))
-                        {
-                            products = products.Where(p => p.Price == price).ToList();
-                        }
-                        break;
+                    Products = Products.Where(a => a.Id != null && a.Id.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                }
+                else if (SearchParams.SearchBy.ToLower() == "name")
+                {
+                    Products = Products.Where(a => a.Name != null && a.Name.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                }
+                else if (SearchParams.SearchBy.ToLower() == "category")
+                {
+                    Products = Products.Where(a => a.Category != null && a.Category.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                }
+                else if (SearchParams.SearchBy.ToLower() == "price")
+                {
+                    Products = Products.Where(a => a.Price.ToString().Contains(SearchParams.Keyword)).ToList();
                 }
             }
-            else if (string.IsNullOrEmpty(SearchParams.SearchBy) && !string.IsNullOrEmpty(SearchParams.Keyword))
+            else if ((string.IsNullOrEmpty(SearchParams.SearchBy) || SearchParams.SearchBy == "") && !string.IsNullOrEmpty(SearchParams.Keyword))
             {
-                products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                Products = Products.Where(a => a.Id != null && a.Id.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
             }
 
-            if (!string.IsNullOrEmpty(SearchParams.SortBy))
+            if (SearchParams.SortBy == null || SearchParams.SortAsc == null)
             {
-                switch (SearchParams.SortBy.ToLower())
-                {
-                    case "id":
-                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Id).ToList() : products.OrderByDescending(p => p.Id).ToList();
-                        break;
-                    case "name":
-                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Name).ToList() : products.OrderByDescending(p => p.Name).ToList();
-                        break;
-                    case "price":
-                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Price).ToList() : products.OrderByDescending(p => p.Price).ToList();
-                        break;
-                    case "category":
-                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Category).ToList() : products.OrderByDescending(p => p.Category).ToList();
-                        break;
-                }
+                this.Products = Products;
+                goto page;
             }
 
-            Products = products;
+            if (SearchParams.SortBy.ToLower() == "id" && SearchParams.SortAsc == true)
+            {
+                this.Products = Products.OrderBy(a => a.Id).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "id" && SearchParams.SortAsc == false)
+            {
+                this.Products = Products.OrderByDescending(a => a.Id).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "name" && SearchParams.SortAsc == true)
+            {
+                this.Products = Products.OrderBy(a => a.Name).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "name" && SearchParams.SortAsc == false)
+            {
+                this.Products = Products.OrderByDescending(a => a.Name).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "price" && SearchParams.SortAsc == true)
+            {
+                this.Products = Products.OrderBy(a => a.Price).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "price" && SearchParams.SortAsc == false)
+            {
+                this.Products = Products.OrderByDescending(a => a.Price).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "category" && SearchParams.SortAsc == true)
+            {
+                this.Products = Products.OrderBy(a => a.Category).ToList();
+            }
+            else if (SearchParams.SortBy.ToLower() == "category" && SearchParams.SortAsc == false)
+            {
+                this.Products = Products.OrderByDescending(a => a.Category).ToList();
+            }
+            else
+            {
+                this.Products = Products;
+            }
+
+        page:
+            int rem = this.Products.Count % pageSize;
+            float pageCount = (this.Products.Count / pageSize) + (rem > 0 ? 1 : 0);
+            int skip = (pageIndex <= pageCount ? pageSize * (pageIndex - 1) : pageSize * (Convert.ToInt32(pageCount - 1)));
+            this.Products = this.Products.Skip(skip).Take(pageSize).ToList();
+            SearchParams.SearchCount = this.Products.Count;
+            SearchParams.PageCount = Convert.ToInt32(pageCount);
         }
 
         public class Product
         {
-            public int Id { get; set; }
+            public string Id { get; set; }
             public string Name { get; set; }
             public decimal Price { get; set; }
             public string Category { get; set; }
@@ -184,15 +210,17 @@ namespace WebApp.Pages
 
         public class SearchParameters
         {
-            public string SearchBy { get; set; }
-            public string Keyword { get; set; }
-            public string SortBy { get; set; }
-            public bool SortAsc { get; set; }
+            public string? SearchBy { get; set; }
+            public string? Keyword { get; set; }
+            public string? SortBy { get; set; }
+            public bool? SortAsc { get; set; }
+            public int? PageSize { get; set; }
+            public int? PageIndex { get; set; }
+            public int? PageCount { get; set;}
         }
     }
+
 }
-
-
 
 
 
