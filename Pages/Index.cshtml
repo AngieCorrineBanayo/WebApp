@@ -1,37 +1,56 @@
 ﻿@page
-@model WebApp.Pages.Index
-
+@model WebApp.Pages.Indexname
 @{
     ViewData["Title"] = "Home page";
 }
-
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div class="input-group mb-3">
+    <label class="input-group-text" for="searchBy">Search By</label>
+    <select class="form-select" id="searchBy" asp-for="SearchParams.SearchBy">
+        <option value="" selected>Choose...</option>
+        <option value="Id">Id</option>
+        <option value="Name">Name</option>
+        <option value="Category">Category</option>
+        <option value="Price">Price</option>
+    </select>
+
+    <input type="text" id="keyword" class="form-control" asp-for="SearchParams.Keyword">
+    <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="search()"><i class="bi bi-search"></i></button>
 </div>
 
 <table class="table">
     <thead>
         <tr>
             <th scope="col">
-                Name
+                Id
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=name&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
-                    <a href="~/index?sortBy=name&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    <a href="~/index?sortBy=Id&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=Id&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
             <th scope="col">
-                Price
+                Name
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=price&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
-                    <a href="~/index?sortBy=price&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    <a href="~/index?sortBy=Name&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=Name&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
             <th scope="col">
                 Category
                 <div class="btn-group" role="group" aria-label="">
-                    <a href="~/index?sortBy=category&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
-                    <a href="~/index?sortBy=category&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                    <a href="~/index?sortBy=Category&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=Category&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
+                </div>
+            </th>
+            <th scope="col">
+                Price
+                <div class="btn-group" role="group" aria-label="">
+                    <a href="~/index?sortBy=Price&sortAsc=false" type="button" class="btn btn-secondary">&lt;</a>
+                    <a href="~/index?sortBy=Price&sortAsc=true" type="button" class="btn btn-secondary">&gt;</a>
                 </div>
             </th>
         </tr>
@@ -40,9 +59,34 @@
         @foreach (var product in Model.Products)
         {
             <tr>
+                <td>@product.Id</td>
                 <td>@product.Name</td>
-                <td>@product.Price</td>
                 <td>@product.Category</td>
+                <td>@product.Price</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        function search() {
+            window.location = "../index?sortBy=Id&sortAsc=false&searchBy=" + $("#searchBy").val() + "&keyword=" + $("#keyword").val()
+        }
+    </script>
+}
+
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model.Products)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Name</td>
+                <td>@product.Category</td>
+                <td>@product.Price</td>
             </tr>
         }
     </tbody>

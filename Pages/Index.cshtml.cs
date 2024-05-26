@@ -3,19 +3,33 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages
 {
-    public class Index : PageModel
+    public class Indexname : PageModel
     {
-        private readonly ILogger<Index> _logger;
+        private readonly ILogger<Indexname> _logger;
 
-        public Index(ILogger<Index> logger)
+        public Indexname(ILogger<Indexname> logger)
         {
             _logger = logger;
         }
 
         public List<Product> Products { get; set; }
 
-        public void OnGet(string? sortBy = null, string? sortAsc = "true")
+        [BindProperty]
+        public SearchParameters SearchParams { get; set; }
+
+        public void OnGet(string keyword = "", string searchBy = "", string sortBy = null, string sortAsc = "true")
         {
+            if (SearchParams == null)
+            {
+                SearchParams = new SearchParameters()
+                {
+                    SortBy = sortBy,
+                    SortAsc = sortAsc == "true",
+                    SearchBy = searchBy,
+                    Keyword = keyword
+                };
+            }
+
             List<Product> products = new List<Product>()
             {
                 new Product {
@@ -109,41 +123,55 @@ namespace WebApp.Pages
                     Category = "Electronics"
                 }
             };
-
-            if (sortBy == null || sortAsc == null)
+            if (!string.IsNullOrEmpty(SearchParams.SearchBy) && !string.IsNullOrEmpty(SearchParams.Keyword))
             {
-                this.Products = products;
-                return;
+                switch (SearchParams.SearchBy.ToLower())
+                {
+                    case "id":
+                        if (int.TryParse(SearchParams.Keyword, out int id))
+                        {
+                            products = products.Where(p => p.Id == id).ToList();
+                        }
+                        break;
+                    case "name":
+                        products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                        break;
+                    case "category":
+                        products = products.Where(p => p.Category != null && p.Category.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
+                        break;
+                    case "price":
+                        if (decimal.TryParse(SearchParams.Keyword, out decimal price))
+                        {
+                            products = products.Where(p => p.Price == price).ToList();
+                        }
+                        break;
+                }
+            }
+            else if (string.IsNullOrEmpty(SearchParams.SearchBy) && !string.IsNullOrEmpty(SearchParams.Keyword))
+            {
+                products = products.Where(p => p.Name != null && p.Name.ToLower().Contains(SearchParams.Keyword.ToLower())).ToList();
             }
 
-            if (sortBy!.ToLower() == "name" && sortAsc!.ToLower() == "true")
+            if (!string.IsNullOrEmpty(SearchParams.SortBy))
             {
-                this.Products = products.OrderBy(a => a.Name).ToList();
+                switch (SearchParams.SortBy.ToLower())
+                {
+                    case "id":
+                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Id).ToList() : products.OrderByDescending(p => p.Id).ToList();
+                        break;
+                    case "name":
+                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Name).ToList() : products.OrderByDescending(p => p.Name).ToList();
+                        break;
+                    case "price":
+                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Price).ToList() : products.OrderByDescending(p => p.Price).ToList();
+                        break;
+                    case "category":
+                        products = SearchParams.SortAsc ? products.OrderBy(p => p.Category).ToList() : products.OrderByDescending(p => p.Category).ToList();
+                        break;
+                }
             }
-            else if (sortBy!.ToLower() == "name" && sortAsc!.ToLower() == "false")
-            {
-                this.Products = products.OrderByDescending(a => a.Name).ToList();
-            }
-            else if (sortBy!.ToLower() == "price" && sortAsc!.ToLower() == "true")
-            {
-                this.Products = products.OrderBy(a => a.Price).ToList();
-            }
-            else if (sortBy!.ToLower() == "price" && sortAsc!.ToLower() == "false")
-            {
-                this.Products = products.OrderByDescending(a => a.Price).ToList();
-            }
-            else if (sortBy!.ToLower() == "category" && sortAsc!.ToLower() == "true")
-            {
-                this.Products = products.OrderBy(a => a.Category).ToList();
-            }
-            else if (sortBy!.ToLower() == "category" && sortAsc!.ToLower() == "false")
-            {
-                this.Products = products.OrderByDescending(a => a.Category).ToList();
-            }
-            else
-            {
-                this.Products = products;
-            }
+
+            Products = products;
         }
 
         public class Product
@@ -153,5 +181,22 @@ namespace WebApp.Pages
             public decimal Price { get; set; }
             public string Category { get; set; }
         }
+
+        public class SearchParameters
+        {
+            public string SearchBy { get; set; }
+            public string Keyword { get; set; }
+            public string SortBy { get; set; }
+            public bool SortAsc { get; set; }
+        }
     }
 }
+
+
+
+
+
+
+
+
+
